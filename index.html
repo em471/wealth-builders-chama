@@ -450,7 +450,7 @@ function renderTracker(C){
   const nar=isNarrow(); const pick=$('#tracker-pick'); pick.hidden=!nar;
   let from=1,to=showTo;
   if(nar){const sel=$('#tracker-month');if(sel.options.length!==showTo){sel.innerHTML='';for(let i=1;i<=showTo;i++)sel.add(new Option(MONTHS[i-1],i));}
-    if(!S.trackerMonth||S.trackerMonth>showTo)S.trackerMonth=showTo;sel.value=S.trackerMonth;from=to=S.trackerMonth;}
+    if(!S.trackerMonthUser||!S.trackerMonth||S.trackerMonth>showTo)S.trackerMonth=showTo;sel.value=S.trackerMonth;from=to=S.trackerMonth;}
   let h='<table><thead><tr><th rowspan="2">Name</th><th rowspan="2" class="ratecol">Rate</th>';
   for(let i=from;i<=to;i++)h+=`<th class="mgroup" colspan="5">${MONTHS[i-1]}</th>`;
   h+='</tr><tr>';for(let i=from;i<=to;i++)h+='<th class="mstart">Savings</th><th>Repaid</th><th>Interest</th><th>Taken</th><th>Check</th>';
@@ -594,7 +594,7 @@ function showTab(t){S.tab=t;for(const b of document.querySelectorAll('#tabs butt
 try{const t=localStorage.getItem('wb-tab');if(t&&document.getElementById('tab-'+t))showTab(t);}catch(e){}
 if(/^#(dash|me|tracker|audit|interest|cash|members)$/.test(location.hash))showTab(location.hash.slice(1));
 $('#me-select').addEventListener('change',e=>{S.me=e.target.value;renderMe(compute());});
-$('#tracker-month').addEventListener('change',e=>{S.trackerMonth=+e.target.value;renderTracker(compute());markWide();});
+$('#tracker-month').addEventListener('change',e=>{S.trackerMonth=+e.target.value;S.trackerMonthUser=true;renderTracker(compute());markWide();});
 
 // ---------- writes ----------
 const pending={};
