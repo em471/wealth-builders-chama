@@ -122,7 +122,44 @@ button.btn:disabled{opacity:.5;cursor:default}
 .finding{border-left:4px solid var(--accent);padding:8px 12px;background:var(--panel);border-radius:0 8px 8px 0;margin:8px 0}
 .finding.bad{border-left-color:var(--bad)} .finding.warn{border-left-color:var(--warn)}
 ol.steps{padding-left:20px} ol.steps li{margin:4px 0}
-@media (max-width:520px){ .tile .val{font-size:1.2rem} .recon .row{grid-template-columns:1fr 110px} .recon input[type=number]{width:110px} }
+@media (max-width:640px){
+  header.top{position:static;border-bottom:0}
+  .brand{padding:10px 0 4px;gap:4px 10px;align-items:center}
+  .brand h1{font-size:1.15rem;flex:1 1 100%}
+  .brand .sub{font-size:.78rem;flex:1 1 100%;order:3}
+  .brand .spacer{display:none}
+  .pill{font-size:.66rem;padding:2px 8px}
+  #authbox button{font-size:.72rem;padding:2px 8px}
+  nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding-inline:12px;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
+  nav.tabs button{padding:9px 10px;font-size:.9rem}
+  main section{padding-top:12px}
+  h2{font-size:1.1rem;margin:18px 0 8px}
+  p.lead{font-size:.92rem}
+  .tiles{grid-template-columns:1fr 1fr;gap:8px}
+  .tile{padding:9px 10px;border-radius:8px}
+  .tile .lab{font-size:.62rem;letter-spacing:.04em}
+  .tile .val{font-size:1.05rem}
+  .tile .hint{font-size:.7rem}
+  .panel{padding:10px 12px}
+  table{font-size:.78rem}
+  th,td{padding:5px 7px}
+  td.num{font-size:.76rem}
+  .tscroll{position:relative}
+  .tscroll.wide::before{content:"Swipe sideways to see more \2192";display:block;font-size:.7rem;color:var(--muted);padding:4px 9px;border-bottom:1px solid var(--line)}
+  .tracker input[type=number]{width:72px;font-size:.8rem;padding:5px 5px}
+  .recon .row{grid-template-columns:1fr 104px;padding:8px 0}
+  .recon .row .t{font-size:.84rem} .recon .row .t small{font-size:.74rem}
+  .recon input[type=number]{width:104px}
+  .recon input[type=date]{width:104px;font-size:.78rem;padding:5px 4px}
+  .tracker .ratecol{display:none}
+  .tracker th:first-child,.tracker td:first-child{max-width:110px;overflow:hidden;text-overflow:ellipsis}
+  .tracker th.mgroup{display:none}
+  .tracker th.mstart,.tracker td.mstart{border-left:0}
+  form.inline label{flex:1 1 100%}
+  form.inline input[type=text],form.inline input[type=date],form.inline select,form.inline input[type=number]{width:100%}
+  .gate{margin:24px auto;padding:18px}
+}
+@media (max-width:400px){ .tiles{grid-template-columns:1fr 1fr} .tile .val{font-size:.98rem} }
 @media (prefers-reduced-motion:reduce){ .toast{transition:none} }
 </style>
 <script>
@@ -161,12 +198,12 @@ const CONFIG = {
   </div>
   <nav class="tabs" role="tablist" id="tabs">
     <button role="tab" data-tab="dash" aria-selected="true">Dashboard</button>
-    <button role="tab" data-tab="me">Member statement</button>
+    <button role="tab" data-tab="me">My statement</button>
     <button role="tab" data-tab="tracker">Tracker</button>
     <button role="tab" data-tab="audit">Audit</button>
     <button role="tab" data-tab="interest">Interest</button>
     <button role="tab" data-tab="cash">Cash probe</button>
-    <button role="tab" data-tab="members">Members &amp; settings</button>
+    <button role="tab" data-tab="members">Members</button>
   </nav>
 </header>
 
@@ -200,13 +237,14 @@ const CONFIG = {
 
 <section id="tab-tracker">
   <p class="lead" id="tracker-intro"></p>
+  <form class="inline" id="tracker-pick" onsubmit="return false" hidden><label>Month <select id="tracker-month"></select></label></form>
   <div class="tscroll tracker" id="tracker-grid"></div>
   <p class="note">Interest = Loan Repaid − previous month's Loan Taken. Check = Loan Repaid − previous Loan Taken × (1 + rate): <b>OK</b> when exact, red when short, amber when over. Checks stay blank until a month has any savings entered.</p>
 </section>
 
 <section id="tab-audit">
   <h2>Collected vs disbursed</h2>
-  <p>Each month's pool = undisbursed brought forward + savings + principal repaid + interest collected. The pool less loans disbursed is what carries into the next month.</p>
+  <p>Each month's pool = undisbursed brought forward + savings + principal repaid + interest collected. The pool less loans disbursed is what carries into the next month. Lending began in March, so the January and February savings form part of the March pool.</p>
   <div class="tscroll" id="audit-cvd"></div>
   <div id="audit-findings"></div>
   <h2>Where the undisbursed cash figure comes from</h2>
@@ -223,7 +261,7 @@ const CONFIG = {
   <div class="panel"><h3>Interest by month (KSh)</h3><div id="ch-interest"></div><div class="legend"><span><i style="background:var(--line)"></i>Ought to be</span><span><i style="background:var(--good)"></i>Collected</span></div></div>
   <h3>By month</h3>
   <div class="tscroll" id="int-monthly"></div>
-  <h3>By member and month</h3>
+  <h3>By member<span class="muted" id="int-grid-note"></span></h3>
   <div class="tscroll" id="int-grid"></div>
 </section>
 
@@ -281,6 +319,7 @@ const fmt2=n=>(n==null||isNaN(n))?'':(Math.round(n*100)/100).toLocaleString('en-
 const sgn=n=>n==null?'':(n>0?'+':'')+fmt2(n);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const slug=s=>String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'m';
+const isNarrow=()=>window.innerWidth<=640;
 
 // ---------- state ----------
 const S={members:{},entries:{},settings:{year:2026,contribution:1000,monthsCompleted:0,cashBf:0},cash:null,canWrite:null,db:null,loaded:{m:false,e:false,s:false,c:false},tab:'dash',me:''};
@@ -326,17 +365,17 @@ function compute(){
 
 // ---------- charts (hand-drawn SVG) ----------
 function barChart(series,labels,cls,h=200){
-  const W=720,L=56,R=12,Tp=14,B=28,n=labels.length,vals=series.flat().filter(v=>v!=null);
+  const nar=isNarrow();const W=nar?400:720,L=nar?44:56,R=10,Tp=14,B=26,n=labels.length,vals=series.flat().filter(v=>v!=null);if(nar)h=Math.round(h*0.85);
   const max=Math.max(1,...vals.map(Math.abs));const y=v=>Tp+(h-Tp-B)*(1-v/max);const band=(W-L-R)/n,bw=band/(series.length+1);
-  const ticks=4;let g='';for(let t=0;t<=ticks;t++){const v=max*t/ticks;g+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;}
+  const ticks=nar?2:4;let g='';for(let t=0;t<=ticks;t++){const v=max*t/ticks;g+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-5}" y="${y(v)+4}" text-anchor="end">${nar?Math.round(v/1000)+'k':fmt(v)}</text>`;}
   let bars='';series.forEach((s,si)=>s.forEach((v,i)=>{if(!v)return;const x=L+i*band+bw*(si+.5);bars+=`<rect class="${cls[si]}" x="${x}" y="${y(v)}" width="${bw}" height="${y(0)-y(v)}" rx="2"><title>${labels[i]}: ${fmt(v)}</title></rect>`;}));
   const xl=labels.map((l,i)=>`<text x="${L+i*band+band/2}" y="${h-8}" text-anchor="middle">${l}</text>`).join('');
   return `<svg class="chart" viewBox="0 0 ${W} ${h}" role="img" aria-label="bar chart">${g}${bars}${xl}</svg>`;
 }
 function lineChart(vals,labels,h=200){
-  const W=720,L=56,R=12,Tp=14,B=28,n=labels.length;const vv=vals.filter(v=>v!=null);
+  const nar=isNarrow();const W=nar?400:720,L=nar?44:56,R=10,Tp=14,B=26,n=labels.length;const vv=vals.filter(v=>v!=null);if(nar)h=Math.round(h*0.85);
   const max=Math.max(1,...vv),min=Math.min(0,...vv);const y=v=>Tp+(h-Tp-B)*(1-(v-min)/(max-min||1));const band=(W-L-R)/n,x=i=>L+i*band+band/2;
-  let g='';const ticks=4;for(let t=0;t<=ticks;t++){const v=min+(max-min)*t/ticks;g+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;}
+  let g='';const ticks=nar?2:4;for(let t=0;t<=ticks;t++){const v=min+(max-min)*t/ticks;g+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-5}" y="${y(v)+4}" text-anchor="end">${nar?Math.round(v/1000)+'k':fmt(v)}</text>`;}
   if(min<0)g+=`<line class="zero" x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}"/>`;
   const pts=vals.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
   const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
@@ -351,13 +390,15 @@ function lineChart(vals,labels,h=200){
 function chkClass(v){return v==null?'calc':(v===0?'ok':(v<0?'bad':'over'));}
 function chkText(v){return v==null?'':(v===0?'OK':sgn(v));}
 
+function markWide(){for(const el of document.querySelectorAll('.tscroll')){const t=el.querySelector('table');el.classList.toggle('wide',!!t&&t.scrollWidth>el.clientWidth+8);}}
 function renderAll(){
   const C=compute(); const any=C.members.length>0;
   $('#asof').textContent=any&&C.last?`As at end of ${MONTHS[C.last-1]} ${C.st.year} · ${C.members.filter(m=>!m.outsider).length} members`:`Member financial tracker ${C.st.year||''}`;
   $('#dash-empty').hidden=any; $('#dash-body').hidden=!any;
   if(any){renderDash(C);renderMe(C);renderAudit(C);renderInterest(C);}
-  renderTracker(C); renderCash(C); renderMembers(C);
+  renderTracker(C); renderCash(C); renderMembers(C); markWide();
 }
+let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(()=>{if(!document.activeElement||document.activeElement.tagName!=='INPUT')renderAll();else markWide();},250);});
 
 function renderDash(C){
   const T=C.T, memberRows=C.rows.filter(r=>!r.m.outsider);
@@ -406,13 +447,17 @@ function renderTracker(C){
   $('#tracker-intro').textContent=w?'Enter Monthly Savings, Loan Repaid and Loan Taken for each line. Interest and Check are worked out as you type; changes save automatically and every member sees them.':'Read-only view of the treasurer\'s entries. Interest and Check columns are worked out from the figures entered.';
   if(!C.members.length){$('#tracker-grid').innerHTML='<div class="empty" style="border:0">Add members first under Members &amp; settings.</div>';return;}
   const showTo=Math.min(12,Math.max(C.last+1,1));
-  let h='<table><thead><tr><th rowspan="2">Name</th><th rowspan="2">Rate</th>';
-  for(let i=1;i<=showTo;i++)h+=`<th class="mgroup" colspan="5">${MONTHS[i-1]}</th>`;
-  h+='</tr><tr>';for(let i=1;i<=showTo;i++)h+='<th class="mstart">Savings</th><th>Repaid</th><th>Interest</th><th>Taken</th><th>Check</th>';
+  const nar=isNarrow(); const pick=$('#tracker-pick'); pick.hidden=!nar;
+  let from=1,to=showTo;
+  if(nar){const sel=$('#tracker-month');if(sel.options.length!==showTo){sel.innerHTML='';for(let i=1;i<=showTo;i++)sel.add(new Option(MONTHS[i-1],i));}
+    if(!S.trackerMonth||S.trackerMonth>showTo)S.trackerMonth=showTo;sel.value=S.trackerMonth;from=to=S.trackerMonth;}
+  let h='<table><thead><tr><th rowspan="2">Name</th><th rowspan="2" class="ratecol">Rate</th>';
+  for(let i=from;i<=to;i++)h+=`<th class="mgroup" colspan="5">${MONTHS[i-1]}</th>`;
+  h+='</tr><tr>';for(let i=from;i<=to;i++)h+='<th class="mstart">Savings</th><th>Repaid</th><th>Interest</th><th>Taken</th><th>Check</th>';
   h+='</tr></thead><tbody>';
   for(const r of C.rows){
-    h+=`<tr><td>${esc(r.m.name)}</td><td class="num">${Math.round(r.rate*100)}%</td>`;
-    for(const c of r.cells){if(c.i>showTo)break;const key=r.m.id+'-'+String(c.i).padStart(2,'0');
+    h+=`<tr><td>${esc(r.m.name)}</td><td class="num ratecol">${Math.round(r.rate*100)}%</td>`;
+    for(const c of r.cells){if(c.i>to)break;if(c.i<from)continue;const key=r.m.id+'-'+String(c.i).padStart(2,'0');
       const cell=(f,v,first)=>w?`<td class="cell${first?' mstart':''}"><input type="number" id="in-${key}-${f}" data-key="${key}" data-f="${f}" value="${v||''}" min="0" step="1" inputmode="numeric"></td>`:`<td class="num${first?' mstart':''}">${fmt(v)||'–'}</td>`;
       h+=cell('savings',c.sav,true);
       h+=cell('repaid',c.rep,false);
@@ -421,13 +466,14 @@ function renderTracker(C){
       h+=`<td class="num ${chkClass(c.check)}">${chkText(c.check)}</td>`;}
     h+='</tr>';
   }
-  h+='<tr class="total"><td>Totals</td><td></td>';
-  for(const c of C.cash){if(c.i>showTo)break;const v=Math.round(C.rows.reduce((s,r)=>s+(r.cells[c.i-1].check||0),0)*100)/100;h+=`<td class="num mstart">${fmt(c.sav)}</td><td class="num">${fmt(c.rep)}</td><td class="num">${fmt(c.interest)}</td><td class="num">${fmt(c.tak)}</td><td class="num ${chkClass(v)}">${chkText(v)}</td>`;}
-  h+='</tr><tr><td>Opening cash</td><td></td>';for(const c of C.cash){if(c.i>showTo)break;h+=`<td class="num calc mstart" colspan="5">${fmt(c.open)}</td>`;}
-  h+='</tr><tr class="total"><td>Closing cash</td><td></td>';for(const c of C.cash){if(c.i>showTo)break;h+=`<td class="num mstart ${c.close<0?'bad':''}" colspan="5">${fmt(c.close)}</td>`;}
+  h+='<tr class="total"><td>Totals</td><td class="ratecol"></td>';
+  for(const c of C.cash){if(c.i>to)break;if(c.i<from)continue;const v=Math.round(C.rows.reduce((s,r)=>s+(r.cells[c.i-1].check||0),0)*100)/100;h+=`<td class="num mstart">${fmt(c.sav)}</td><td class="num">${fmt(c.rep)}</td><td class="num">${fmt(c.interest)}</td><td class="num">${fmt(c.tak)}</td><td class="num ${chkClass(v)}">${chkText(v)}</td>`;}
+  h+='</tr><tr><td>Opening cash</td><td class="ratecol"></td>';for(const c of C.cash){if(c.i>to)break;if(c.i<from)continue;h+=`<td class="num calc mstart" colspan="5">${fmt(c.open)}</td>`;}
+  h+='</tr><tr class="total"><td>Closing cash</td><td class="ratecol"></td>';for(const c of C.cash){if(c.i>to)break;if(c.i<from)continue;h+=`<td class="num mstart ${c.close<0?'bad':''}" colspan="5">${fmt(c.close)}</td>`;}
   h+='</tr></tbody></table>';
   const active=document.activeElement&&document.activeElement.id; const sel=active?[document.activeElement.selectionStart,document.activeElement.selectionEnd]:null;
-  $('#tracker-grid').innerHTML=h;
+  const grid=$('#tracker-grid');grid.innerHTML=h;
+  if(!nar&&!S.trackerScrolled){S.trackerScrolled=true;requestAnimationFrame(()=>{grid.scrollLeft=grid.scrollWidth;});}
   if(active&&active.startsWith('in-')){const el=document.getElementById(active);if(el){el.focus();}}
 }
 
@@ -443,7 +489,12 @@ function renderAudit(C){
   f+=`<div class="finding">Loans outstanding now: <b>KSh ${fmt(T.outstanding)}</b> (loans taken less principal returned). Interest collected to date: <b>KSh ${fmt(T.interest)}</b>.</div>`;
   $('#audit-findings').innerHTML=f;
   const recon=(title,lines)=>`<div class="panel recon"><h3>${title}</h3>${lines.map(l=>`<div class="row ${l[2]||''}"><div class="t">${l[0]}</div><div class="v">${l[1]}</div></div>`).join('')}</div>`;
-  const gaps=C.cash.filter(c=>c.recorded||c.i<=C.last).map(c=>[`${MON[c.i-1]}: ${fmt(c.sav+c.rep)} in, ${fmt(c.tak)} out`,sgn(c.gap)]);
+  // Month by month: months before the first loan are pooled into the first lending month (Jan + Feb savings became the March pool)
+  const rec=C.cash.filter(c=>c.recorded||c.i<=C.last); const firstLend=rec.findIndex(c=>c.tak>0);
+  const gaps=[]; let pre=0, preFrom=null;
+  rec.forEach((c,idx)=>{ if(firstLend>0&&idx<firstLend){pre+=c.sav+c.rep; if(preFrom==null)preFrom=c.i; return;}
+    const inn=c.sav+c.rep+(idx===firstLend?pre:0); const lbl=idx===firstLend&&pre?`${MON[c.i-1]} (incl. ${MON[preFrom-1]}${c.i-1>preFrom?'–'+MON[c.i-2]:''} savings)`:MON[c.i-1];
+    gaps.push([`${lbl}: ${fmt(inn)} in, ${fmt(c.tak)} out`,sgn(inn-c.tak)]); });
   $('#audit-recon').innerHTML=
     recon('A. Totals',[['Member savings',fmt(T.sav)],['add: principal repaid',fmt(T.principal)],['add: interest collected',fmt(T.interest)],['Total money that came in',fmt(T.collected),'res'],['less: all loans disbursed',fmt(-T.tak)],['Undisbursed',fmt(T.undisbursed),'res']])+
     recon('B. Month by month',[...gaps,['Sum of monthly surpluses and shortfalls',fmt(T.undisbursed),'res']])+
@@ -473,14 +524,14 @@ function renderInterest(C){
   for(const c of C.cash){const vv=Math.round((c.interest-c.expected)*100)/100;h+=`<tr><td>${MON[c.i-1]}</td><td class="num">${fmt(c.interest)||'–'}</td><td class="num">${fmt2(c.expected)||'–'}</td><td class="num ${c.expected?chkClass(vv):'calc'}">${c.expected?chkText(vv):''}</td><td class="num">${c.expected?(c.interest/c.expected*100).toFixed(1)+'%':''}</td><td class="num ${c.flags?'over':''}">${c.flags||''}</td></tr>`;}
   h+=`<tr class="total"><td>Total</td><td class="num">${fmt(T.interest)}</td><td class="num">${fmt2(T.expected)}</td><td class="num ${chkClass(v)}">${chkText(v)}</td><td class="num">${T.expected?(T.interest/T.expected*100).toFixed(1)+'%':''}</td><td class="num">${T.flags}</td></tr></tbody></table>`;
   $('#int-monthly').innerHTML=h;
-  const to=Math.max(C.last,1);
+  const to=isNarrow()?0:Math.max(C.last,1);
   h='<table><thead><tr><th rowspan="2">Member</th><th rowspan="2">Rate</th>';for(let i=1;i<=to;i++)h+=`<th class="mgroup" colspan="3">${MON[i-1]}</th>`;h+='<th class="mgroup" colspan="4">Year to date</th></tr><tr>';
   for(let i=1;i<=to;i++)h+='<th class="mstart">Collected</th><th>Ought</th><th>Var</th>';h+='<th class="mstart">Collected</th><th>Ought</th><th>Var</th><th>Result</th></tr></thead><tbody>';
   for(const r of C.rows){h+=`<tr><td>${esc(r.m.name)}</td><td class="num">${Math.round(r.rate*100)}%</td>`;
     for(const c of r.cells){if(c.i>to)break;h+=`<td class="num mstart">${c.interest==null?'':fmt(c.interest)}</td><td class="num calc">${c.expected==null?'':fmt2(c.expected)}</td><td class="num ${chkClass(c.variance)}">${chkText(c.variance)}</td>`;}
     const res=r.yExp===0?'No loans':(r.yVar===0?'Correct':(r.yVar<0?'Under-collected':'Over-collected'));
     h+=`<td class="num mstart"><b>${fmt(r.yInt)}</b></td><td class="num"><b>${fmt2(r.yExp)}</b></td><td class="num ${chkClass(r.yVar)}">${chkText(r.yVar)}</td><td><span class="chip ${res==='Correct'?'ok':(res==='No loans'?'na':(res==='Under-collected'?'bad':'warn'))}">${res}</span></td></tr>`;}
-  h+='</tbody></table>';$('#int-grid').innerHTML=h;
+  h+='</tbody></table>';$('#int-grid').innerHTML=h;$('#int-grid-note').textContent=isNarrow()?' (year to date; open on a wider screen for the month-by-month grid)':' and month';
 }
 
 function renderCash(C){
@@ -539,10 +590,11 @@ function renderMembers(C){
 
 // ---------- tabs ----------
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(!b)return;showTab(b.dataset.tab);});
-function showTab(t){S.tab=t;for(const b of document.querySelectorAll('#tabs button'))b.setAttribute('aria-selected',b.dataset.tab===t?'true':'false');for(const s of document.querySelectorAll('main section'))s.classList.toggle('active',s.id==='tab-'+t);try{localStorage.setItem('wb-tab',t);}catch(e){}}
+function showTab(t){S.tab=t;for(const b of document.querySelectorAll('#tabs button'))b.setAttribute('aria-selected',b.dataset.tab===t?'true':'false');for(const s of document.querySelectorAll('main section'))s.classList.toggle('active',s.id==='tab-'+t);try{localStorage.setItem('wb-tab',t);}catch(e){}if(typeof markWide==='function')markWide();}
 try{const t=localStorage.getItem('wb-tab');if(t&&document.getElementById('tab-'+t))showTab(t);}catch(e){}
 if(/^#(dash|me|tracker|audit|interest|cash|members)$/.test(location.hash))showTab(location.hash.slice(1));
 $('#me-select').addEventListener('change',e=>{S.me=e.target.value;renderMe(compute());});
+$('#tracker-month').addEventListener('change',e=>{S.trackerMonth=+e.target.value;renderTracker(compute());markWide();});
 
 // ---------- writes ----------
 const pending={};
