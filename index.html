@@ -138,7 +138,9 @@ const CONFIG = {
     messagingSenderId: "546197625645",
     appId: "1:546197625645:web:8bbc2e11997af1378151a4"
   },
-  editors: ["em@eminstituteinc.org", "troy@elyonmedia.com"]
+  editors: ["em@eminstituteinc.org", "troy@elyonmedia.com"],
+  // Member PIN, stored as a SHA-256 hash. To change it, hash the new PIN (e.g. https://emn178.github.io/online-tools/sha256.html) and paste here.
+  memberPinHash: "ed946f65d2c785d90e827c5ffd879ce3b49c68d4c88013074176a7e73bc58bcf"
 };
 // ==============================================================
 </script>
@@ -171,7 +173,8 @@ const CONFIG = {
 <div class="gate" id="gate" hidden>
   <h2>Wealth Builders Chama</h2>
   <p>Members can view every statement, the audit and the cash position. The treasurer signs in with Google to enter figures.</p>
-  <div class="btns"><button class="btn" id="g-member">Continue as member (view only)</button><button class="btn ghost" id="g-treasurer">Treasurer sign-in with Google</button></div>
+  <form class="inline f" id="pin-form" onsubmit="return false" style="margin-top:14px"><label>Member PIN <input type="password" id="g-pin" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••" style="width:120px;letter-spacing:.2em"></label><button class="btn" id="g-member" type="submit">Continue as member (view only)</button></form>
+  <div class="btns"><button class="btn ghost" id="g-treasurer">Treasurer sign-in with Google</button></div>
   <p class="note" id="g-msg"></p>
 </div>
 <main hidden>
@@ -595,13 +598,20 @@ function subscribe(db){
   db.doc('cashcount/latest').onSnapshot(snap=>{if(snap.exists&&!pending['cash'])S.cash=snap.data();S.loaded.c=true;done();},e=>{});
 }
 if(!window.firebase||!CONFIG.firebase.apiKey){
-  $('#gate').hidden=false;$('#g-member').disabled=true;$('#g-treasurer').disabled=true;
+  $('#gate').hidden=false;$('#g-member').disabled=true;$('#g-treasurer').disabled=true;$('#g-pin').disabled=true;
   $('#g-msg').textContent='Not configured yet: open index.html and paste your Firebase config into the CONFIG block at the top (see README).';
 }else{
   firebase.initializeApp(CONFIG.firebase);
   const fdb=firebase.firestore(), auth=firebase.auth();
   const editors=CONFIG.editors.map(e=>e.toLowerCase());
-  $('#g-member').addEventListener('click',()=>{$('#g-msg').textContent='';auth.signInAnonymously().catch(e=>{$('#g-msg').textContent='Could not sign in: '+e.code+'. In Firebase Authentication, enable the Anonymous provider.';});});
+  async function sha256(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+  let pinOk=false; try{pinOk=localStorage.getItem('wb-pin')===CONFIG.memberPinHash;}catch(e){}
+  if(pinOk){$('#g-pin').value='••••';$('#g-pin').disabled=true;}
+  $('#pin-form').addEventListener('submit',async()=>{$('#g-msg').textContent='';
+    if(!pinOk){const pin=$('#g-pin').value.trim();if(!pin){$('#g-msg').textContent='Enter the member PIN.';return;}
+      const hh=await sha256(pin);if(hh!==CONFIG.memberPinHash){$('#g-msg').textContent='That PIN is not correct. Ask the treasurer for the member PIN.';$('#g-pin').select();return;}
+      pinOk=true;try{localStorage.setItem('wb-pin',hh);}catch(e){}}
+    auth.signInAnonymously().catch(e=>{$('#g-msg').textContent='Could not sign in: '+e.code+'. In Firebase Authentication, enable the Anonymous provider.';});});
   $('#g-treasurer').addEventListener('click',()=>{$('#g-msg').textContent='';auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{$('#g-msg').textContent='Could not sign in: '+e.code;});});
   let subscribed=false;
   auth.onAuthStateChanged(u=>{
@@ -612,7 +622,7 @@ if(!window.firebase||!CONFIG.firebase.apiKey){
     if(email&&!S.canWrite){$('#g-msg').textContent='';}
     setRole();
     $('#authbox').innerHTML=`<button id="signout">${email?esc(email)+' · ':''}Sign out</button>`;
-    $('#signout').addEventListener('click',()=>auth.signOut().then(()=>location.reload()));
+    $('#signout').addEventListener('click',()=>{try{localStorage.removeItem('wb-pin');}catch(e){}auth.signOut().then(()=>location.reload());});
     S.db=fdb; sync('Connecting…');
     if(!subscribed){subscribed=true;subscribe(fdb);} else renderAll();
   });
