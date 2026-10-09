@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b6e4a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%231b6e4a%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-size=%2718%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27serif%27 font-weight=%27700%27%3EW%3C/text%3E%3C/svg%3E">
+<title>Wealth Builders Chama</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+html{padding:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: one column, sticky header with tab bar; wide tables scroll inside their own frame.
+   Palette: forest green on a cool, slightly green-biased off-white; amber for warnings, brick for shortfalls. */
+:root{
+  --bg:#f3f6f4; --panel:#ffffff; --fg:#17211c; --muted:#5d6b64; --line:#d6ded9;
+  --accent:#1b6e4a; --accent-ink:#ffffff; --accent-soft:#dff0e6;
+  --warn:#b7791f; --warn-soft:#fbf0d5; --bad:#b3362b; --bad-soft:#f9e0dc; --good:#1f7a46; --good-soft:#dcf2e4;
+  --key:#fff4c2; --input:#fffdf2;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-display:"IBM Plex Serif",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#111816; --panel:#1a2320; --fg:#e8eeea; --muted:#9baba3; --line:#2c3a34;
+  --accent:#4fb37f; --accent-ink:#0d1a13; --accent-soft:#1d3a2c;
+  --warn:#e2a93c; --warn-soft:#3a2f14; --bad:#e3685b; --bad-soft:#3d1f1b; --good:#5fc58a; --good-soft:#1b3a28;
+  --key:#3b3416; --input:#232c27; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#111816; --panel:#1a2320; --fg:#e8eeea; --muted:#9baba3; --line:#2c3a34;
+  --accent:#4fb37f; --accent-ink:#0d1a13; --accent-soft:#1d3a2c;
+  --warn:#e2a93c; --warn-soft:#3a2f14; --bad:#e3685b; --bad-soft:#3d1f1b; --good:#5fc58a; --good-soft:#1b3a28;
+  --key:#3b3416; --input:#232c27; color-scheme:dark }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-block:0 48px;padding-inline:16px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;padding:14px 0 6px}
+.brand h1{font-family:var(--font-display);font-weight:600;font-size:1.45rem;margin:0;letter-spacing:.01em}
+.brand .sub{color:var(--muted);font-size:.9rem}
+.brand .spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:.78rem;font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+.pill.edit{background:var(--accent-soft);color:var(--accent)}
+.pill.view{background:var(--line);color:var(--muted)}
+#authbox button{font:inherit;font-size:.8rem;font-weight:600;background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:3px 10px;cursor:pointer}
+#authbox button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.gate{max-width:520px;margin:48px auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px}
+.gate h2{margin-top:0}
+.gate .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.pill.sync{background:transparent;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{flex:0 0 auto;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:inherit;font-weight:600;padding:8px 12px 10px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px}
+main section{display:none;padding-top:20px}
+main section.active{display:block}
+h2{font-family:var(--font-display);font-weight:600;font-size:1.25rem;margin:24px 0 10px;text-wrap:balance}
+h2:first-child{margin-top:0}
+h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 8px}
+p{max-width:68ch}
+p.lead{font-size:1.02rem}
+.muted{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 4px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.tile .lab{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.tile .val{font-family:var(--font-mono);font-size:1.45rem;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.15;overflow-wrap:anywhere}
+.tile .hint{font-size:.78rem;color:var(--muted);margin-top:4px}
+.tile.key{background:var(--key);border-color:transparent}
+.tile.bad .val{color:var(--bad)} .tile.good .val{color:var(--good)} .tile.warn .val{color:var(--warn)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.grid2>*{min-width:0}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;background:var(--panel);position:sticky;top:0;z-index:1}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--panel);z-index:2;font-weight:500}
+th:first-child{z-index:3}
+tr.total td{font-weight:700;background:var(--key)}
+tr.total td:first-child{background:var(--key)}
+td.num{font-family:var(--font-mono);font-size:.84rem}
+td.ok{color:var(--good);font-weight:600} td.bad{background:var(--bad-soft);color:var(--bad);font-weight:600} td.over{background:var(--warn-soft);color:var(--warn);font-weight:600}
+td.calc{color:var(--muted)}
+th.mgroup{text-align:center;border-left:2px solid var(--line);color:var(--fg)}
+td.mstart,th.mstart{border-left:2px solid var(--line)}
+.tracker input[type=number]{width:84px;font:inherit;font-family:var(--font-mono);font-size:.84rem;text-align:right;padding:4px 6px;border:1px solid var(--line);border-radius:5px;background:var(--input);color:var(--fg)}
+.tracker input[type=number]:focus{outline:2px solid var(--accent);border-color:transparent}
+.tracker input.dirty{border-color:var(--warn)}
+.tracker td.cell{padding:3px 4px}
+.chip{display:inline-block;border-radius:6px;padding:2px 8px;font-size:.76rem;font-weight:600}
+.chip.ok{background:var(--good-soft);color:var(--good)} .chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.na{background:var(--line);color:var(--muted)}
+.chart{width:100%;height:auto;display:block}
+.chart text{font-family:var(--font-body);font-size:11px;fill:var(--muted)}
+.chart .axis{stroke:var(--line)} .chart .zero{stroke:var(--muted)}
+.chart .bar-a{fill:var(--line)} .chart .bar-b{fill:var(--accent)} .chart .bar-c{fill:var(--good)}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2.5} .chart .dot{fill:var(--accent)} .chart .neg{fill:var(--bad)}
+.chart .lbl{fill:var(--fg);font-weight:600}
+.legend{display:flex;gap:14px;font-size:.8rem;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+form.inline{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+form.inline label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+input[type=text],input[type=date],select,.f input[type=number]{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--input);color:var(--fg);min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button.btn{font:inherit;font-weight:600;padding:8px 14px;border-radius:7px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.btn.ghost{background:transparent;color:var(--accent)}
+button.btn.danger{background:transparent;color:var(--bad);border-color:var(--bad)}
+button.btn:disabled{opacity:.5;cursor:default}
+.recon .row{display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.recon .row:last-child{border-bottom:0}
+.recon .row .t{font-size:.9rem} .recon .row .t small{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
+.recon .row .v{font-family:var(--font-mono);text-align:right;font-variant-numeric:tabular-nums}
+.recon .row.res{font-weight:700;background:var(--key);margin:0 -16px;padding:10px 16px}
+.recon .row.res.zero{background:var(--good-soft)} .recon .row.res.off{background:var(--bad-soft)}
+.recon input[type=number]{width:130px;font-family:var(--font-mono);text-align:right;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--input);color:var(--fg);font-size:.9rem}
+.note{font-size:.85rem;color:var(--muted);margin:6px 0}
+.empty{padding:36px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.finding{border-left:4px solid var(--accent);padding:8px 12px;background:var(--panel);border-radius:0 8px 8px 0;margin:8px 0}
+.finding.bad{border-left-color:var(--bad)} .finding.warn{border-left-color:var(--warn)}
+ol.steps{padding-left:20px} ol.steps li{margin:4px 0}
+@media (max-width:520px){ .tile .val{font-size:1.2rem} .recon .row{grid-template-columns:1fr 110px} .recon input[type=number]{width:110px} }
+@media (prefers-reduced-motion:reduce){ .toast{transition:none} }
+</style>
+<script>
+// ======================= CONFIGURE HERE =======================
+// 1. Paste the firebaseConfig object from Firebase console → Project settings → Your apps (Web).
+// 2. List the Google account emails allowed to EDIT (treasurer, chairperson). Everyone else is view-only.
+const CONFIG = {
+  firebase: {
+    apiKey: "AIzaSyDM7k3ZB7YlQn_Oac6dQrAt05PtzsH2b1g",
+    authDomain: "wealth-builders-chama.firebaseapp.com",
+    projectId: "wealth-builders-chama",
+    storageBucket: "wealth-builders-chama.firebasestorage.app",
+    messagingSenderId: "546197625645",
+    appId: "1:546197625645:web:8bbc2e11997af1378151a4"
+  },
+  editors: ["em@eminstituteinc.org", "troy@elyonmedia.com"]
+};
+// ==============================================================
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="top" hidden>
+  <div class="brand">
+    <h1>Wealth Builders Chama</h1>
+    <span class="sub" id="asof">Member financial tracker</span>
+    <span class="spacer"></span>
+    <span class="pill view" id="rolepill">Loading…</span>
+    <span class="pill sync" id="syncpill"></span>
+    <span id="authbox"></span>
+  </div>
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="dash" aria-selected="true">Dashboard</button>
+    <button role="tab" data-tab="me">Member statement</button>
+    <button role="tab" data-tab="tracker">Tracker</button>
+    <button role="tab" data-tab="audit">Audit</button>
+    <button role="tab" data-tab="interest">Interest</button>
+    <button role="tab" data-tab="cash">Cash probe</button>
+    <button role="tab" data-tab="members">Members &amp; settings</button>
+  </nav>
+</header>
+
+<div class="gate" id="gate" hidden>
+  <h2>Wealth Builders Chama</h2>
+  <p>Members can view every statement, the audit and the cash position. The treasurer signs in with Google to enter figures.</p>
+  <div class="btns"><button class="btn" id="g-member">Continue as member (view only)</button><button class="btn ghost" id="g-treasurer">Treasurer sign-in with Google</button></div>
+  <p class="note" id="g-msg"></p>
+</div>
+<main hidden>
+<section id="tab-dash" class="active">
+  <div id="dash-empty" class="empty" hidden>No records yet. The treasurer adds members and monthly figures under <b>Members &amp; settings</b> and <b>Tracker</b>.</div>
+  <div id="dash-body" hidden>
+    <div class="tiles" id="tiles"></div>
+    <div class="grid2">
+      <div class="panel"><h3>Collected vs disbursed by month (KSh)</h3><div id="ch-collected"></div><div class="legend"><span><i style="background:var(--line)"></i>Collected</span><span><i style="background:var(--accent)"></i>Disbursed</span></div></div>
+      <div class="panel"><h3>Cash the fund should hold, month end (KSh)</h3><div id="ch-cash"></div></div>
+    </div>
+    <h3>Monthly summary (KSh)</h3>
+    <div class="tscroll" id="dash-monthly"></div>
+    <h3>Member summary (KSh)</h3>
+    <div class="tscroll" id="dash-members"></div>
+  </div>
+</section>
+
+<section id="tab-me">
+  <form class="inline" onsubmit="return false"><label>Member <select id="me-select"></select></label></form>
+  <div id="me-body"></div>
+</section>
+
+<section id="tab-tracker">
+  <p class="lead" id="tracker-intro"></p>
+  <div class="tscroll tracker" id="tracker-grid"></div>
+  <p class="note">Interest = Loan Repaid − previous month's Loan Taken. Check = Loan Repaid − previous Loan Taken × (1 + rate): <b>OK</b> when exact, red when short, amber when over. Checks stay blank until a month has any savings entered.</p>
+</section>
+
+<section id="tab-audit">
+  <h2>Collected vs disbursed</h2>
+  <p>Each month's pool = undisbursed brought forward + savings + principal repaid + interest collected. The pool less loans disbursed is what carries into the next month.</p>
+  <div class="tscroll" id="audit-cvd"></div>
+  <div id="audit-findings"></div>
+  <h2>Where the undisbursed cash figure comes from</h2>
+  <div class="grid2" id="audit-recon"></div>
+  <h2>Repayments that do not match the rate</h2>
+  <div class="tscroll" id="audit-ie"></div>
+  <h2>Savings compliance</h2>
+  <div id="audit-savings"></div>
+</section>
+
+<section id="tab-interest">
+  <p class="lead">Interest collected as per the data versus interest that ought to have been collected: previous month's loan × 10% for members, × 20% for non-member ("out borrow") loans.</p>
+  <div class="tiles" id="int-tiles"></div>
+  <div class="panel"><h3>Interest by month (KSh)</h3><div id="ch-interest"></div><div class="legend"><span><i style="background:var(--line)"></i>Ought to be</span><span><i style="background:var(--good)"></i>Collected</span></div></div>
+  <h3>By month</h3>
+  <div class="tscroll" id="int-monthly"></div>
+  <h3>By member and month</h3>
+  <div class="tscroll" id="int-grid"></div>
+</section>
+
+<section id="tab-cash">
+  <p class="lead">The book says what cash the fund <em>should</em> hold. Count the money, enter it, then work through the reconciling items until the unexplained remainder is zero.</p>
+  <div class="grid2">
+    <div class="panel recon" id="cash-count"></div>
+    <div class="panel recon" id="cash-book"></div>
+  </div>
+  <div class="panel recon" id="cash-items"></div>
+  <div class="panel"><h3>How to read the result</h3><div id="cash-guide"></div></div>
+</section>
+
+<section id="tab-members">
+  <div class="grid2">
+    <div class="panel">
+      <h3>Settings</h3>
+      <form class="inline f" id="settings-form" onsubmit="return false">
+        <label>Year <input type="number" id="s-year" min="2020" max="2100"></label>
+        <label>Monthly contribution (KSh) <input type="number" id="s-contrib" min="0" step="100"></label>
+        <label>Months completed <input type="number" id="s-months" min="0" max="12"></label>
+        <label>Cash brought forward (KSh) <input type="number" id="s-cashbf" step="1"></label>
+        <button class="btn" id="s-save" type="button">Save settings</button>
+      </form>
+      <p class="note">"Months completed" sets the savings target (contribution × months) and the "as at" date on the dashboard.</p>
+    </div>
+    <div class="panel">
+      <h3>Add a member or outsider loan line</h3>
+      <form class="inline f" id="member-form" onsubmit="return false">
+        <label>Name <input type="text" id="m-name" placeholder="e.g. Grace" required></label>
+        <label>Rate % <input type="number" id="m-rate" value="10" min="0" max="100" step="1"></label>
+        <label>Loan b/f from last year <input type="number" id="m-bf" value="0" step="1"></label>
+        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="m-out"> Non-member (out borrow)</label>
+        <button class="btn" id="m-add" type="button">Add</button>
+      </form>
+      <p class="note">A non-member line is a loan guaranteed by a member for an outsider at 20%. Name it after the guarantor, e.g. "Out borrow – Phanice".</p>
+    </div>
+  </div>
+  <div id="import-box" hidden class="panel"><h3>Starting records</h3><p class="note">The database is empty. Load the January–September 2026 records reconciled to the handwritten book (15 lines, 111 monthly entries), then continue from October.</p><button class="btn" id="import-btn">Import Jan–Sep 2026 records</button></div>
+  <h3>Member list</h3>
+  <div class="tscroll" id="member-list"></div>
+</section>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MON=MONTHS.map(m=>m.slice(0,3));
+const $=s=>document.querySelector(s);
+const fmt=n=>(n==null||n===''||isNaN(n))?'':Math.round(n).toLocaleString('en-US');
+const fmt2=n=>(n==null||isNaN(n))?'':(Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2});
+const sgn=n=>n==null?'':(n>0?'+':'')+fmt2(n);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug=s=>String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'m';
+
+// ---------- state ----------
+const S={members:{},entries:{},settings:{year:2026,contribution:1000,monthsCompleted:0,cashBf:0},cash:null,canWrite:null,db:null,loaded:{m:false,e:false,s:false,c:false},tab:'dash',me:''};
+let toastT; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
+function sync(txt){$('#syncpill').textContent=txt||'';}
+
+// ---------- model (mirrors the workbook) ----------
+function compute(){
+  const st=S.settings, members=Object.values(S.members).sort((a,b)=>(a.order??999)-(b.order??999)||a.name.localeCompare(b.name));
+  const E=S.entries; const get=(id,i)=>E[id+'-'+String(i).padStart(2,'0')]||{};
+  const n=v=>+v||0;
+  const monthly=[];
+  for(let i=1;i<=12;i++){
+    let sav=0,rep=0,tak=0; for(const m of members){const e=get(m.id,i);sav+=n(e.savings);rep+=n(e.repaid);tak+=n(e.taken);}
+    monthly.push({i,sav,rep,tak,recorded:sav>0,interest:0,expected:0,flags:0});
+  }
+  const rows=members.map(m=>{
+    const rate=n(m.rate)/100; const cells=[]; let ySav=0,yTak=0,yInt=0,yExp=0,yChk=0;
+    for(let i=1;i<=12;i++){
+      const e=get(m.id,i), sav=n(e.savings),rep=n(e.repaid),tak=n(e.taken);
+      const prev=i===1?n(m.loanBf):n(get(m.id,i-1).taken);
+      const rec=monthly[i-1].recorded;
+      const interest=(rec&&rep)?rep-prev:null;
+      const expected=(rec&&prev)?prev*rate:null;
+      const check=(!rec||(prev===0&&rep===0))?null:Math.round((rep-prev*(1+rate))*100)/100;
+      const variance=(interest==null&&expected==null)?null:Math.round(((interest||0)-(expected||0))*100)/100;
+      cells.push({i,sav,rep,tak,prev,interest,expected,check,variance});
+      ySav+=sav;yTak+=tak;yInt+=interest||0;yExp+=expected||0;yChk+=check||0;
+      monthly[i-1].interest+=interest||0; monthly[i-1].expected+=expected||0; if(check!=null&&check!==0)monthly[i-1].flags++;
+    }
+    const target=m.outsider?null:n(st.contribution)*n(st.monthsCompleted);
+    const status=m.outsider?'n/a':(ySav>=target?'OK':'Short '+fmt(target-ySav));
+    return {m,rate,cells,ySav,yTak,yInt,yExp,yChk,target,status,yVar:Math.round((yInt-yExp)*100)/100};
+  });
+  // cash position
+  let open=n(st.cashBf); const cash=[];
+  for(const mo of monthly){const pool=open+mo.sav+mo.rep;const close=pool-mo.tak;const principal=mo.rep-mo.interest;cash.push({...mo,open,pool,close,principal,gap:mo.sav+mo.rep-mo.tak});open=close;}
+  const T={sav:0,rep:0,tak:0,interest:0,expected:0,principal:0,flags:0};for(const c of cash){T.sav+=c.sav;T.rep+=c.rep;T.tak+=c.tak;T.interest+=c.interest;T.expected+=c.expected;T.principal+=c.principal;T.flags+=c.flags;}
+  T.collected=T.sav+T.rep; T.undisbursed=cash[11].close; T.outstanding=T.tak-T.principal; T.own=T.sav+T.interest;
+  const last=Math.max(0,...cash.filter(c=>c.recorded).map(c=>c.i));
+  return {members,rows,cash,T,last,st};
+}
+
+// ---------- charts (hand-drawn SVG) ----------
+function barChart(series,labels,cls,h=200){
+  const W=720,L=56,R=12,Tp=14,B=28,n=labels.length,vals=series.flat().filter(v=>v!=null);
+  const max=Math.max(1,...vals.map(Math.abs));const y=v=>Tp+(h-Tp-B)*(1-v/max);const band=(W-L-R)/n,bw=band/(series.length+1);
+  const ticks=4;let g='';for(let t=0;t<=ticks;t++){const v=max*t/ticks;g+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;}
+  let bars='';series.forEach((s,si)=>s.forEach((v,i)=>{if(!v)return;const x=L+i*band+bw*(si+.5);bars+=`<rect class="${cls[si]}" x="${x}" y="${y(v)}" width="${bw}" height="${y(0)-y(v)}" rx="2"><title>${labels[i]}: ${fmt(v)}</title></rect>`;}));
+  const xl=labels.map((l,i)=>`<text x="${L+i*band+band/2}" y="${h-8}" text-anchor="middle">${l}</text>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${h}" role="img" aria-label="bar chart">${g}${bars}${xl}</svg>`;
+}
+function lineChart(vals,labels,h=200){
+  const W=720,L=56,R=12,Tp=14,B=28,n=labels.length;const vv=vals.filter(v=>v!=null);
+  const max=Math.max(1,...vv),min=Math.min(0,...vv);const y=v=>Tp+(h-Tp-B)*(1-(v-min)/(max-min||1));const band=(W-L-R)/n,x=i=>L+i*band+band/2;
+  let g='';const ticks=4;for(let t=0;t<=ticks;t++){const v=min+(max-min)*t/ticks;g+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;}
+  if(min<0)g+=`<line class="zero" x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}"/>`;
+  const pts=vals.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  let dots='';vals.forEach((v,i)=>{if(v==null)return;dots+=`<circle class="dot ${v<0?'neg':''}" cx="${x(i)}" cy="${y(v)}" r="4"><title>${labels[i]}: ${fmt(v)}</title></circle>`;});
+  const lastIdx=vals.map((v,i)=>v==null?-1:i).filter(i=>i>=0).pop();
+  const lbl=lastIdx!=null?`<text class="lbl" x="${x(lastIdx)}" y="${y(vals[lastIdx])-10}" text-anchor="middle">${fmt(vals[lastIdx])}</text>`:'';
+  const xl=labels.map((l,i)=>`<text x="${x(i)}" y="${h-8}" text-anchor="middle">${l}</text>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${h}" role="img" aria-label="line chart">${g}<path class="line" d="${path}"/>${dots}${lbl}${xl}</svg>`;
+}
+
+// ---------- renderers ----------
+function chkClass(v){return v==null?'calc':(v===0?'ok':(v<0?'bad':'over'));}
+function chkText(v){return v==null?'':(v===0?'OK':sgn(v));}
+
+function renderAll(){
+  const C=compute(); const any=C.members.length>0;
+  $('#asof').textContent=any&&C.last?`As at end of ${MONTHS[C.last-1]} ${C.st.year} · ${C.members.filter(m=>!m.outsider).length} members`:`Member financial tracker ${C.st.year||''}`;
+  $('#dash-empty').hidden=any; $('#dash-body').hidden=!any;
+  if(any){renderDash(C);renderMe(C);renderAudit(C);renderInterest(C);}
+  renderTracker(C); renderCash(C); renderMembers(C);
+}
+
+function renderDash(C){
+  const T=C.T, memberRows=C.rows.filter(r=>!r.m.outsider);
+  const onTarget=memberRows.filter(r=>r.status==='OK').length;
+  const varInt=Math.round((T.interest-T.expected)*100)/100;
+  const cashV=S.cash&&(S.cash.cash||S.cash.bank||S.cash.mpesa)?((+S.cash.cash||0)+(+S.cash.bank||0)+(+S.cash.mpesa||0))-T.undisbursed:null;
+  const tiles=[
+    ['Member savings to date',fmt(T.sav),''],
+    ['Loans disbursed to date',fmt(T.tak),''],
+    ['Interest collected / ought to be',fmt(T.interest)+' / '+fmt(T.expected),''],
+    ['Loans outstanding now',fmt(T.outstanding),'loans taken − principal returned'],
+    ['Cash the fund should hold',fmt(T.undisbursed),'collected − disbursed','key'+(T.undisbursed<0?' bad':'')],
+    ['Members on savings target',onTarget+' of '+memberRows.length,'',onTarget===memberRows.length?'good':'warn'],
+    ['Repayments not matching rate',String(T.flags),'',T.flags?'warn':'good'],
+    ['Cash variance (actual − book)',cashV==null?'not counted yet':sgn(cashV),'',cashV==null?'':(cashV===0?'good':'bad')],
+  ];
+  $('#tiles').innerHTML=tiles.map(t=>`<div class="tile ${t[3]||''}"><div class="lab">${t[0]}</div><div class="val">${t[1]}</div>${t[2]?`<div class="hint">${t[2]}</div>`:''}</div>`).join('');
+  $('#ch-collected').innerHTML=barChart([C.cash.map(c=>c.sav+c.rep),C.cash.map(c=>c.tak)],MON,['bar-a','bar-b']);
+  $('#ch-cash').innerHTML=lineChart(C.cash.map(c=>c.i<=Math.max(C.last,1)?c.close:null),MON);
+  let h='<table><thead><tr><th>Month</th><th>Savings</th><th>Principal repaid</th><th>Interest</th><th>Collected</th><th>Disbursed</th><th>Closing cash</th><th>Rate flags</th></tr></thead><tbody>';
+  for(const c of C.cash){h+=`<tr><td>${MON[c.i-1]}</td><td class="num">${fmt(c.sav)||'–'}</td><td class="num">${fmt(c.principal)||'–'}</td><td class="num">${fmt(c.interest)||'–'}</td><td class="num">${fmt(c.sav+c.rep)||'–'}</td><td class="num">${fmt(c.tak)||'–'}</td><td class="num ${c.close<0?'bad':''}">${fmt(c.close)}</td><td class="num ${c.flags?'over':''}">${c.flags||''}</td></tr>`;}
+  h+=`<tr class="total"><td>Total</td><td class="num">${fmt(T.sav)}</td><td class="num">${fmt(T.principal)}</td><td class="num">${fmt(T.interest)}</td><td class="num">${fmt(T.collected)}</td><td class="num">${fmt(T.tak)}</td><td class="num">${fmt(T.undisbursed)}</td><td class="num">${T.flags}</td></tr></tbody></table>`;
+  $('#dash-monthly').innerHTML=h;
+  h='<table><thead><tr><th>Member</th><th>Savings</th><th>Status</th><th>Loans taken</th><th>Interest paid</th><th>Rate check</th></tr></thead><tbody>';
+  for(const r of C.rows){h+=`<tr><td>${esc(r.m.name)}</td><td class="num">${fmt(r.ySav)||'–'}</td><td><span class="chip ${r.status==='OK'?'ok':(r.status==='n/a'?'na':'bad')}">${r.status}</span></td><td class="num">${fmt(r.yTak)||'–'}</td><td class="num">${fmt(r.yInt)||'–'}</td><td class="num ${chkClass(r.yChk)}">${chkText(r.yChk)}</td></tr>`;}
+  h+=`<tr class="total"><td>Total</td><td class="num">${fmt(T.sav)}</td><td></td><td class="num">${fmt(T.tak)}</td><td class="num">${fmt(T.interest)}</td><td class="num ${chkClass(Math.round(C.rows.reduce((s,r)=>s+r.yChk,0)*100)/100)}">${chkText(Math.round(C.rows.reduce((s,r)=>s+r.yChk,0)*100)/100)}</td></tr></tbody></table>`;
+  $('#dash-members').innerHTML=h;
+}
+
+function renderMe(C){
+  const sel=$('#me-select'); const cur=S.me||sel.value;
+  sel.innerHTML=C.members.map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('');
+  if(cur&&S.members[cur])sel.value=cur; S.me=sel.value;
+  const r=C.rows.find(x=>x.m.id===S.me); if(!r){$('#me-body').innerHTML='';return;}
+  const tiles=[['Savings to date',fmt(r.ySav),r.target!=null?`target ${fmt(r.target)}`:''],['Savings status',r.status,'',r.status==='OK'?'good':(r.status==='n/a'?'':'bad')],['Loans taken this year',fmt(r.yTak),''],['Interest paid',fmt(r.yInt),''],['Current loan',fmt(r.cells[Math.max(C.last,1)-1].tak),`due next month with ${fmt(r.cells[Math.max(C.last,1)-1].tak*r.rate)} interest`],['Repayment check',chkText(r.yChk)||'–','net over the year',r.yChk===0?'good':(r.yChk<0?'bad':'warn')]];
+  let h=`<div class="tiles">${tiles.map(t=>`<div class="tile ${t[3]||''}"><div class="lab">${t[0]}</div><div class="val">${t[1]}</div>${t[2]?`<div class="hint">${t[2]}</div>`:''}</div>`).join('')}</div>`;
+  h+='<div class="tscroll"><table><thead><tr><th>Month</th><th>Savings</th><th>Loan taken</th><th>Repaid</th><th>Interest</th><th>Check</th></tr></thead><tbody>';
+  for(const c of r.cells){if(c.i>Math.max(C.last,1))break;h+=`<tr><td>${MONTHS[c.i-1]}</td><td class="num">${fmt(c.sav)||'–'}</td><td class="num">${fmt(c.tak)||'–'}</td><td class="num">${fmt(c.rep)||'–'}</td><td class="num">${c.interest==null?'–':fmt(c.interest)}</td><td class="num ${chkClass(c.check)}">${chkText(c.check)}</td></tr>`;}
+  h+=`<tr class="total"><td>Total</td><td class="num">${fmt(r.ySav)}</td><td class="num">${fmt(r.yTak)}</td><td class="num">${fmt(r.cells.reduce((s,c)=>s+c.rep,0))}</td><td class="num">${fmt(r.yInt)}</td><td class="num ${chkClass(r.yChk)}">${chkText(r.yChk)}</td></tr></tbody></table></div>`;
+  h+=`<p class="note">Rate on this line: ${Math.round(r.rate*100)}% per month${r.m.outsider?' (non-member loan)':''}. A red check is interest short; amber is an over-payment.</p>`;
+  $('#me-body').innerHTML=h;
+}
+
+function renderTracker(C){
+  const w=!!S.canWrite;
+  $('#tracker-intro').textContent=w?'Enter Monthly Savings, Loan Repaid and Loan Taken for each line. Interest and Check are worked out as you type; changes save automatically and every member sees them.':'Read-only view of the treasurer\'s entries. Interest and Check columns are worked out from the figures entered.';
+  if(!C.members.length){$('#tracker-grid').innerHTML='<div class="empty" style="border:0">Add members first under Members &amp; settings.</div>';return;}
+  const showTo=Math.min(12,Math.max(C.last+1,1));
+  let h='<table><thead><tr><th rowspan="2">Name</th><th rowspan="2">Rate</th>';
+  for(let i=1;i<=showTo;i++)h+=`<th class="mgroup" colspan="5">${MONTHS[i-1]}</th>`;
+  h+='</tr><tr>';for(let i=1;i<=showTo;i++)h+='<th class="mstart">Savings</th><th>Repaid</th><th>Interest</th><th>Taken</th><th>Check</th>';
+  h+='</tr></thead><tbody>';
+  for(const r of C.rows){
+    h+=`<tr><td>${esc(r.m.name)}</td><td class="num">${Math.round(r.rate*100)}%</td>`;
+    for(const c of r.cells){if(c.i>showTo)break;const key=r.m.id+'-'+String(c.i).padStart(2,'0');
+      const cell=(f,v,first)=>w?`<td class="cell${first?' mstart':''}"><input type="number" id="in-${key}-${f}" data-key="${key}" data-f="${f}" value="${v||''}" min="0" step="1" inputmode="numeric"></td>`:`<td class="num${first?' mstart':''}">${fmt(v)||'–'}</td>`;
+      h+=cell('savings',c.sav,true);
+      h+=cell('repaid',c.rep,false);
+      h+=`<td class="num calc">${c.interest==null?'':fmt(c.interest)}</td>`;
+      h+=cell('taken',c.tak,false);
+      h+=`<td class="num ${chkClass(c.check)}">${chkText(c.check)}</td>`;}
+    h+='</tr>';
+  }
+  h+='<tr class="total"><td>Totals</td><td></td>';
+  for(const c of C.cash){if(c.i>showTo)break;const v=Math.round(C.rows.reduce((s,r)=>s+(r.cells[c.i-1].check||0),0)*100)/100;h+=`<td class="num mstart">${fmt(c.sav)}</td><td class="num">${fmt(c.rep)}</td><td class="num">${fmt(c.interest)}</td><td class="num">${fmt(c.tak)}</td><td class="num ${chkClass(v)}">${chkText(v)}</td>`;}
+  h+='</tr><tr><td>Opening cash</td><td></td>';for(const c of C.cash){if(c.i>showTo)break;h+=`<td class="num calc mstart" colspan="5">${fmt(c.open)}</td>`;}
+  h+='</tr><tr class="total"><td>Closing cash</td><td></td>';for(const c of C.cash){if(c.i>showTo)break;h+=`<td class="num mstart ${c.close<0?'bad':''}" colspan="5">${fmt(c.close)}</td>`;}
+  h+='</tr></tbody></table>';
+  const active=document.activeElement&&document.activeElement.id; const sel=active?[document.activeElement.selectionStart,document.activeElement.selectionEnd]:null;
+  $('#tracker-grid').innerHTML=h;
+  if(active&&active.startsWith('in-')){const el=document.getElementById(active);if(el){el.focus();}}
+}
+
+function renderAudit(C){
+  const T=C.T;
+  let h='<table><thead><tr><th>Month</th><th>Undisbursed b/f</th><th>Savings</th><th>Principal repaid</th><th>Interest collected</th><th>Pool (incl. b/f)</th><th>Disbursed</th><th>Undisbursed c/f</th></tr></thead><tbody>';
+  for(const c of C.cash){h+=`<tr><td>${MONTHS[c.i-1]}</td><td class="num">${fmt(c.open)}</td><td class="num">${fmt(c.sav)||'–'}</td><td class="num">${fmt(c.principal)||'–'}</td><td class="num">${fmt(c.interest)||'–'}</td><td class="num"><b>${fmt(c.pool)}</b></td><td class="num">${fmt(c.tak)||'–'}</td><td class="num ${c.close<0?'bad':''}"><b>${fmt(c.close)}</b></td></tr>`;}
+  h+=`<tr class="total"><td>Total</td><td></td><td class="num">${fmt(T.sav)}</td><td class="num">${fmt(T.principal)}</td><td class="num">${fmt(T.interest)}</td><td class="num">${fmt(T.collected)}</td><td class="num">${fmt(T.tak)}</td><td class="num">${fmt(T.undisbursed)}</td></tr></tbody></table>`;
+  $('#audit-cvd').innerHTML=h;
+  const negs=C.cash.filter(c=>c.recorded&&c.close<0);
+  let f=`<div class="finding"><b>KSh ${fmt(T.undisbursed)}</b> has been collected and not lent out. The treasurer should hold exactly this in cash or at the bank.</div>`;
+  for(const c of negs)f+=`<div class="finding bad"><b>${MONTHS[c.i-1]}:</b> loans of ${fmt(c.tak)} exceeded the pool of ${fmt(c.pool)} by ${fmt(-c.close)}. Either that money came from outside the fund or an entry for the month is missing or misrecorded.</div>`;
+  f+=`<div class="finding">Loans outstanding now: <b>KSh ${fmt(T.outstanding)}</b> (loans taken less principal returned). Interest collected to date: <b>KSh ${fmt(T.interest)}</b>.</div>`;
+  $('#audit-findings').innerHTML=f;
+  const recon=(title,lines)=>`<div class="panel recon"><h3>${title}</h3>${lines.map(l=>`<div class="row ${l[2]||''}"><div class="t">${l[0]}</div><div class="v">${l[1]}</div></div>`).join('')}</div>`;
+  const gaps=C.cash.filter(c=>c.recorded||c.i<=C.last).map(c=>[`${MON[c.i-1]}: ${fmt(c.sav+c.rep)} in, ${fmt(c.tak)} out`,sgn(c.gap)]);
+  $('#audit-recon').innerHTML=
+    recon('A. Totals',[['Member savings',fmt(T.sav)],['add: principal repaid',fmt(T.principal)],['add: interest collected',fmt(T.interest)],['Total money that came in',fmt(T.collected),'res'],['less: all loans disbursed',fmt(-T.tak)],['Undisbursed',fmt(T.undisbursed),'res']])+
+    recon('B. Month by month',[...gaps,['Sum of monthly surpluses and shortfalls',fmt(T.undisbursed),'res']])+
+    recon("C. The fund's own money",[['Member savings (they revolve, never spent)',fmt(T.sav)],['add: interest earned',fmt(T.interest)],["The fund's own money",fmt(T.own),'res'],['less: out on loan now',fmt(-T.outstanding)],['Left in cash',fmt(T.undisbursed),'res']]);
+  // interest exceptions
+  const ex=[];for(const r of C.rows)for(const c of r.cells){if(c.check!=null&&c.check!==0)ex.push({r,c});}
+  if(!ex.length)$('#audit-ie').innerHTML='<div class="empty" style="border:0">Every repayment matches the rate exactly.</div>';
+  else{h='<table><thead><tr><th>Loan month</th><th>Borrower</th><th>Loan taken</th><th>Repaid next month</th><th>Expected</th><th>Difference</th><th>Implied rate</th><th>Likely cause</th></tr></thead><tbody>';
+    for(const {r,c} of ex){const loanM=c.i-1;const exp=c.prev*(1+r.rate);const impl=c.prev?((c.rep/c.prev)-1):null;
+      let cause='';const cand=c.rep/(1+r.rate);
+      if(c.rep===0)cause='No repayment recorded; loan still outstanding or missed';
+      else if(Math.abs(c.check)<=5)cause='Rounding';
+      else if(c.rep===c.prev)cause='Principal repaid with no interest';
+      else if(Math.abs(cand-Math.round(cand/100)*100)<0.01&&cand!==c.prev)cause=`Loan was probably ${fmt(cand)} (${fmt(cand)} × ${(1+r.rate).toFixed(1)} = ${fmt(c.rep)}): check the entry`;
+      else cause=c.check<0?'Interest under-collected; needs explanation':'Over-payment; refund or credit';
+      h+=`<tr><td>${loanM>=1?MONTHS[loanM-1]:'Loan b/f'}</td><td>${esc(r.m.name)}</td><td class="num">${fmt(c.prev)}</td><td class="num">${fmt(c.rep)}</td><td class="num">${fmt2(exp)}</td><td class="num ${chkClass(c.check)}">${sgn(c.check)}</td><td class="num">${impl==null?'':(impl*100).toFixed(1)+'%'}</td><td style="white-space:normal;text-align:left;min-width:220px">${cause}</td></tr>`;}
+    h+='</tbody></table>';$('#audit-ie').innerHTML=h;}
+  const mr=C.rows.filter(r=>!r.m.outsider),ok=mr.filter(r=>r.status==='OK');
+  $('#audit-savings').innerHTML=`<div class="finding ${ok.length===mr.length?'':'warn'}">Members meeting the savings target: <b>${ok.length} of ${mr.length}</b>. Target per member: KSh ${fmt(C.st.contribution*C.st.monthsCompleted)} (${C.st.monthsCompleted} months × ${fmt(C.st.contribution)}). Total member savings: KSh ${fmt(T.sav)}.${mr.filter(r=>r.status!=='OK').map(r=>` ${esc(r.m.name)}: ${r.status}.`).join('')}</div>`;
+}
+
+function renderInterest(C){
+  const T=C.T,v=Math.round((T.interest-T.expected)*100)/100;
+  $('#int-tiles').innerHTML=[['Interest collected (data)',fmt(T.interest),''],['Ought to be (rule)',fmt2(T.expected),''],['Variance',sgn(v)||'OK','',v===0?'good':(v<0?'bad':'warn')],['% of rule collected',T.expected?(T.interest/T.expected*100).toFixed(1)+'%':'–',''],['Loans not matching rate',String(T.flags),'',T.flags?'warn':'good']].map(t=>`<div class="tile ${t[3]||''}"><div class="lab">${t[0]}</div><div class="val">${t[1]}</div></div>`).join('');
+  $('#ch-interest').innerHTML=barChart([C.cash.map(c=>c.expected),C.cash.map(c=>c.interest)],MON,['bar-a','bar-c'],180);
+  let h='<table><thead><tr><th>Month</th><th>Collected (data)</th><th>Ought to be (rule)</th><th>Variance</th><th>% collected</th><th>Loans not matching</th></tr></thead><tbody>';
+  for(const c of C.cash){const vv=Math.round((c.interest-c.expected)*100)/100;h+=`<tr><td>${MON[c.i-1]}</td><td class="num">${fmt(c.interest)||'–'}</td><td class="num">${fmt2(c.expected)||'–'}</td><td class="num ${c.expected?chkClass(vv):'calc'}">${c.expected?chkText(vv):''}</td><td class="num">${c.expected?(c.interest/c.expected*100).toFixed(1)+'%':''}</td><td class="num ${c.flags?'over':''}">${c.flags||''}</td></tr>`;}
+  h+=`<tr class="total"><td>Total</td><td class="num">${fmt(T.interest)}</td><td class="num">${fmt2(T.expected)}</td><td class="num ${chkClass(v)}">${chkText(v)}</td><td class="num">${T.expected?(T.interest/T.expected*100).toFixed(1)+'%':''}</td><td class="num">${T.flags}</td></tr></tbody></table>`;
+  $('#int-monthly').innerHTML=h;
+  const to=Math.max(C.last,1);
+  h='<table><thead><tr><th rowspan="2">Member</th><th rowspan="2">Rate</th>';for(let i=1;i<=to;i++)h+=`<th class="mgroup" colspan="3">${MON[i-1]}</th>`;h+='<th class="mgroup" colspan="4">Year to date</th></tr><tr>';
+  for(let i=1;i<=to;i++)h+='<th class="mstart">Collected</th><th>Ought</th><th>Var</th>';h+='<th class="mstart">Collected</th><th>Ought</th><th>Var</th><th>Result</th></tr></thead><tbody>';
+  for(const r of C.rows){h+=`<tr><td>${esc(r.m.name)}</td><td class="num">${Math.round(r.rate*100)}%</td>`;
+    for(const c of r.cells){if(c.i>to)break;h+=`<td class="num mstart">${c.interest==null?'':fmt(c.interest)}</td><td class="num calc">${c.expected==null?'':fmt2(c.expected)}</td><td class="num ${chkClass(c.variance)}">${chkText(c.variance)}</td>`;}
+    const res=r.yExp===0?'No loans':(r.yVar===0?'Correct':(r.yVar<0?'Under-collected':'Over-collected'));
+    h+=`<td class="num mstart"><b>${fmt(r.yInt)}</b></td><td class="num"><b>${fmt2(r.yExp)}</b></td><td class="num ${chkClass(r.yVar)}">${chkText(r.yVar)}</td><td><span class="chip ${res==='Correct'?'ok':(res==='No loans'?'na':(res==='Under-collected'?'bad':'warn'))}">${res}</span></td></tr>`;}
+  h+='</tbody></table>';$('#int-grid').innerHTML=h;
+}
+
+function renderCash(C){
+  const T=C.T,w=!!S.canWrite,cc=S.cash||{};
+  const inp=(id,v,ph)=>w?`<input type="number" id="${id}" data-cash="${id}" value="${v??''}" step="1" placeholder="${ph||0}">`:`<span class="v">${fmt(v)||'–'}</span>`;
+  const actual=(+cc.cash||0)+(+cc.bank||0)+(+cc.mpesa||0),counted=actual>0;
+  $('#cash-count').innerHTML=`<h3>A. Actual money counted</h3>
+    <div class="row"><div class="t">Cash in hand (treasurer)</div><div class="v">${inp('cash',cc.cash)}</div></div>
+    <div class="row"><div class="t">Bank account balance</div><div class="v">${inp('bank',cc.bank)}</div></div>
+    <div class="row"><div class="t">M-Pesa / mobile money float</div><div class="v">${inp('mpesa',cc.mpesa)}</div></div>
+    <div class="row"><div class="t">Counted on</div><div class="v">${w?`<input type="date" id="date" data-cash="date" value="${esc(cc.date||'')}">`:esc(cc.date||'–')}</div></div>
+    <div class="row res"><div class="t">Total actual cash</div><div class="v">${fmt(actual)}</div></div>`;
+  $('#cash-book').innerHTML=`<h3>B. What the book says the fund should hold</h3>
+    <div class="row"><div class="t">Member savings to date</div><div class="v">${fmt(T.sav)}</div></div>
+    <div class="row"><div class="t">add: interest collected</div><div class="v">${fmt(T.interest)}</div></div>
+    <div class="row res"><div class="t">The fund's own money</div><div class="v">${fmt(T.own)}</div></div>
+    <div class="row"><div class="t">less: loans out with borrowers</div><div class="v">${fmt(-T.outstanding)}</div></div>
+    <div class="row res"><div class="t">Book cash</div><div class="v">${fmt(T.undisbursed)}</div></div>
+    <div class="row res ${counted?(actual-T.undisbursed===0?'zero':'off'):''}"><div class="t">Variance (actual − book)<small>positive = more than the book explains, negative = money missing</small></div><div class="v">${counted?sgn(actual-T.undisbursed):'not counted yet'}</div></div>`;
+  const neg=C.cash.filter(c=>c.recorded&&c.close<0).reduce((s,c)=>s+Math.min(0,c.gap<0&&c.close<0?c.close-Math.min(0,c.open):0),0);
+  const mayLike=C.cash.filter(c=>c.recorded&&c.close<0&&c.open>=0).reduce((s,c)=>s-c.close,0);
+  const items=[
+    ['i1','Months where more was lent than the fund had',`If that money came from a collection never written down, actual cash is higher by this amount. If someone advanced it personally, set to 0 and record it as a debt the fund owes.`,mayLike,'Audit tab, negative months'],
+    ['i2','Loan amounts mis-keyed on the tracker',`Check the loan receipts for every row flagged "loan was probably…" on the Audit tab. If the real loan was larger, the book overstates cash: enter the difference as a negative.`,null,'Audit tab, rate exceptions'],
+    ['i3','Interest recorded as not collected but actually received',`Only the part that was physically received and not written down.`,null,'Interest tab'],
+    ['i4','Operating expenses paid from the fund',`M-Pesa withdrawal and transfer charges, bank charges, stationery, registration. The tracker has no expense column, so every shilling spent lowers actual cash below the book. Enter as a negative.`,null,'M-Pesa statements, receipts'],
+    ['i5','Other money received but not on the tracker',`Fines, joining fees, welfare contributions, bank interest. Enter as a positive.`,null,'Receipt book'],
+    ['i6','Opening cash from last year not entered in settings',`If the chama held cash on 1 January, enter it in Members &amp; settings instead; this line is then not needed.`,null,'Settings'],
+    ['i7','Timing: next month\'s money already in or out before the count',`Savings or repayments received early (+), loans already paid out (−). Enter the net.`,null,'Receipts after month end'],
+    ['i8','Loans in the book never paid out, or paid at a different amount',`+ if less was paid out than recorded.`,null,'Borrower confirmation'],
+    ['i9','Savings in the book never actually paid, or paid but not recorded',`Every member shows at target, so this should be zero unless a receipt is missing.`,null,'Member confirmation'],
+  ];
+  const vals=cc.items||{};let explained=0;
+  let h='<h3>D. Reconciling items</h3><p class="note">Enter each amount as its effect on actual cash relative to the book: + means more cash than the book shows, − means less.</p>';
+  for(const it of items){const v=vals[it[0]]!=null?+vals[it[0]]:(it[3]!=null?it[3]:0);explained+=v;
+    h+=`<div class="row"><div class="t"><b>${it[1]}</b><small>${it[2]} <em>Source: ${it[4]}.</em></small></div><div class="v">${w?`<input type="number" id="${it[0]}" data-item="${it[0]}" value="${v||''}" step="1" placeholder="0">`:(sgn(v)||'0')}</div></div>`;}
+  const variance=counted?actual-T.undisbursed:null;const remainder=variance==null?null:variance-explained;
+  h+=`<div class="row res"><div class="t">Total explained</div><div class="v">${sgn(explained)||'0'}</div></div>
+      <div class="row res ${remainder==null?'':(remainder===0?'zero':'off')}"><div class="t">Unexplained remainder<small>variance − explained. The probe is finished when this is zero.</small></div><div class="v">${remainder==null?'count first':sgn(remainder)||'0'}</div></div>`;
+  $('#cash-items').innerHTML=h;
+  $('#cash-guide').innerHTML=`<p>Book cash is <b>KSh ${fmt(T.undisbursed)}</b>. Before the count the book already carries its own warnings: any month with a negative closing balance, and interest recorded as not collected (${sgn(Math.round((T.interest-T.expected)*100)/100)||'none'}). Neither changes book cash by itself; they are reasons the count may come out different.</p>
+    <p><b>If actual cash is lower</b> than the book, look first at operating expenses (item 4), then loans recorded smaller than paid or paid out but not recorded (items 2 and 8).</p>
+    <p><b>If actual cash is higher</b>, look first at a month that over-lent (item 1: a collection never written down), then money received but not recorded (items 3 and 5), then timing (item 7).</p>
+    <p>A remainder that will not close after the nine items is money unaccounted for. Record it as a finding with the date and the names of the people who counted.</p>`;
+}
+
+function renderMembers(C){
+  const w=!!S.canWrite,st=S.settings;
+  $('#s-year').value=st.year??'';$('#s-contrib').value=st.contribution??'';$('#s-months').value=st.monthsCompleted??'';$('#s-cashbf').value=st.cashBf??'';
+  for(const el of document.querySelectorAll('#settings-form input,#settings-form button,#member-form input,#member-form button'))el.disabled=!w;
+  if(!C.members.length){$('#member-list').innerHTML='<div class="empty" style="border:0">No members yet.</div>';return;}
+  let h=`<table><thead><tr><th>#</th><th>Name</th><th>Type</th><th>Rate</th><th>Loan b/f</th><th>Savings</th><th>Loans taken</th>${w?'<th></th>':''}</tr></thead><tbody>`;
+  C.rows.forEach((r,i)=>{h+=`<tr><td>${i+1}</td><td style="text-align:left">${esc(r.m.name)}</td><td>${r.m.outsider?'<span class="chip warn">Non-member loan</span>':'<span class="chip ok">Member</span>'}</td><td class="num">${Math.round(r.rate*100)}%</td><td class="num">${fmt(r.m.loanBf)||'–'}</td><td class="num">${fmt(r.ySav)||'–'}</td><td class="num">${fmt(r.yTak)||'–'}</td>${w?`<td><button class="btn ghost" data-up="${esc(r.m.id)}" title="Move up">↑</button> <button class="btn danger" data-del="${esc(r.m.id)}">Remove</button></td>`:''}</tr>`;});
+  h+='</tbody></table>';$('#member-list').innerHTML=h;
+}
+
+// ---------- tabs ----------
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(!b)return;showTab(b.dataset.tab);});
+function showTab(t){S.tab=t;for(const b of document.querySelectorAll('#tabs button'))b.setAttribute('aria-selected',b.dataset.tab===t?'true':'false');for(const s of document.querySelectorAll('main section'))s.classList.toggle('active',s.id==='tab-'+t);try{localStorage.setItem('wb-tab',t);}catch(e){}}
+try{const t=localStorage.getItem('wb-tab');if(t&&document.getElementById('tab-'+t))showTab(t);}catch(e){}
+if(/^#(dash|me|tracker|audit|interest|cash|members)$/.test(location.hash))showTab(location.hash.slice(1));
+$('#me-select').addEventListener('change',e=>{S.me=e.target.value;renderMe(compute());});
+
+// ---------- writes ----------
+const pending={};
+function queueWrite(key,fn,delay=500){clearTimeout(pending[key]);pending[key]=setTimeout(async()=>{delete pending[key];try{sync('Saving…');await fn();sync('Saved');setTimeout(()=>sync(''),1500);}catch(err){sync('');const code=err&&err.code;if(code==='invalid_argument'&&S.canWrite==null){S.canWrite=false;renderAll();toast('This account can view but not edit.');}else toast('Could not save: '+(code||'error'));}},delay);}
+document.addEventListener('input',e=>{
+  const el=e.target; if(!S.db)return;
+  if(el.dataset.key){el.classList.add('dirty');const key=el.dataset.key;const [id,mm]=[key.slice(0,-3),+key.slice(-2)];
+    const read=f=>{const x=document.getElementById(`in-${key}-${f}`);return x?(+x.value||0):0;};
+    queueWrite('e:'+key,async()=>{const body={member:id,month:mm,savings:read('savings'),repaid:read('repaid'),taken:read('taken')};
+      if(!body.savings&&!body.repaid&&!body.taken)await S.db.doc('entries/'+key).delete();else await S.db.doc('entries/'+key).set(body);
+      el.classList.remove('dirty');});
+    // local optimistic update so Interest/Check recompute as you type
+    S.entries[key]={member:id,month:mm,savings:read('savings'),repaid:read('repaid'),taken:read('taken')};
+    if(!S.entries[key].savings&&!S.entries[key].repaid&&!S.entries[key].taken)delete S.entries[key];
+    queueWrite('render',async()=>renderTracker(compute()),700);
+  }
+  if(el.dataset.cash||el.dataset.item){
+    const cc=Object.assign({cash:0,bank:0,mpesa:0,date:'',items:{}},S.cash||{});cc.items=Object.assign({},cc.items||{});
+    if(el.dataset.cash)cc[el.dataset.cash]=el.dataset.cash==='date'?el.value:(+el.value||0);else cc.items[el.dataset.item]=el.value===''?null:(+el.value||0);
+    S.cash=cc;queueWrite('cash',async()=>S.db.doc('cashcount/latest').set(cc));
+    queueWrite('render-cash',async()=>{const a=document.activeElement&&document.activeElement.id;renderCash(compute());renderDash(compute());if(a){const x=document.getElementById(a);if(x)x.focus();}},900);
+  }
+});
+$('#s-save').addEventListener('click',()=>{if(!S.db)return;const body={year:+$('#s-year').value||2026,contribution:+$('#s-contrib').value||0,monthsCompleted:+$('#s-months').value||0,cashBf:+$('#s-cashbf').value||0};S.settings=body;renderAll();queueWrite('settings',async()=>S.db.doc('settings/main').set(body),0);});
+$('#m-add').addEventListener('click',()=>{if(!S.db)return;const name=$('#m-name').value.trim();if(!name){toast('Enter a name');return;}
+  const id=slug(name);if(S.members[id]){toast('That name already exists');return;}
+  const order=Math.max(0,...Object.values(S.members).map(m=>m.order||0))+1;
+  const body={name,rate:+$('#m-rate').value||0,outsider:$('#m-out').checked,loanBf:+$('#m-bf').value||0,order};
+  S.members[id]={id,...body};renderAll();$('#m-name').value='';
+  queueWrite('m:'+id,async()=>S.db.doc('members/'+id).set(body),0);});
+$('#m-out').addEventListener('change',e=>{$('#m-rate').value=e.target.checked?20:10;});
+$('#member-list').addEventListener('click',e=>{const d=e.target.closest('[data-del]'),u=e.target.closest('[data-up]');if(!S.db)return;
+  if(d){const id=d.dataset.del;if(d.dataset.armed!=='1'){d.dataset.armed='1';d.textContent='Confirm remove';setTimeout(()=>{d.dataset.armed='';d.textContent='Remove';},3000);return;}
+    delete S.members[id];for(const k of Object.keys(S.entries))if(k.startsWith(id+'-'))delete S.entries[k];renderAll();
+    queueWrite('del:'+id,async()=>{await S.db.doc('members/'+id).delete();for(let i=1;i<=12;i++)await S.db.doc('entries/'+id+'-'+String(i).padStart(2,'0')).delete();},0);}
+  if(u){const id=u.dataset.up;const list=Object.values(S.members).sort((a,b)=>(a.order??999)-(b.order??999));const idx=list.findIndex(m=>m.id===id);if(idx<=0)return;
+    const a=list[idx-1],b=list[idx];const ao=a.order,bo=b.order;a.order=bo;b.order=ao;renderAll();
+    queueWrite('ord',async()=>{await S.db.doc('members/'+a.id).update({order:a.order});await S.db.doc('members/'+b.id).update({order:b.order});},0);}
+});
+
+// ---------- boot (Firebase) ----------
+renderAll();
+const SEED={"members":{"phanice":{"name":"Phanice","rate":10,"outsider":false,"loanBf":0,"order":1},"maryline":{"name":"Maryline","rate":10,"outsider":false,"loanBf":0,"order":2},"judy":{"name":"Judy","rate":10,"outsider":false,"loanBf":0,"order":3},"patience":{"name":"Patience","rate":10,"outsider":false,"loanBf":0,"order":4},"reuben":{"name":"Reuben","rate":10,"outsider":false,"loanBf":0,"order":5},"ashley":{"name":"Ashley","rate":10,"outsider":false,"loanBf":0,"order":6},"cate":{"name":"Cate","rate":10,"outsider":false,"loanBf":0,"order":7},"kennedy":{"name":"Kennedy","rate":10,"outsider":false,"loanBf":0,"order":8},"j-moraa":{"name":"J. Moraa","rate":10,"outsider":false,"loanBf":0,"order":9},"valarie":{"name":"Valarie","rate":10,"outsider":false,"loanBf":0,"order":10},"mash":{"name":"Mash","rate":10,"outsider":false,"loanBf":0,"order":11},"julius":{"name":"Julius","rate":10,"outsider":false,"loanBf":0,"order":12},"out-borrow-maryline":{"name":"out borrow - Maryline","rate":20,"outsider":true,"loanBf":0,"order":13},"out-borrow-phanice":{"name":"Out borrow - Phanice","rate":20,"outsider":true,"loanBf":0,"order":14},"betty":{"name":"Betty","rate":10,"outsider":false,"loanBf":0,"order":15}},"entries":{"phanice-01":{"member":"phanice","month":1,"savings":1000,"repaid":0,"taken":0},"phanice-02":{"member":"phanice","month":2,"savings":1000,"repaid":0,"taken":0},"phanice-03":{"member":"phanice","month":3,"savings":1000,"repaid":0,"taken":4900},"phanice-04":{"member":"phanice","month":4,"savings":1000,"repaid":5390,"taken":5200},"phanice-05":{"member":"phanice","month":5,"savings":1000,"repaid":5720,"taken":10000},"phanice-06":{"member":"phanice","month":6,"savings":1000,"repaid":11000,"taken":19000},"phanice-07":{"member":"phanice","month":7,"savings":1000,"repaid":20900,"taken":17150},"phanice-08":{"member":"phanice","month":8,"savings":1000,"repaid":18865,"taken":16765},"phanice-09":{"member":"phanice","month":9,"savings":1000,"repaid":18440,"taken":22000},"maryline-01":{"member":"maryline","month":1,"savings":1000,"repaid":0,"taken":0},"maryline-02":{"member":"maryline","month":2,"savings":1000,"repaid":0,"taken":0},"maryline-03":{"member":"maryline","month":3,"savings":1000,"repaid":0,"taken":8000},"maryline-04":{"member":"maryline","month":4,"savings":1000,"repaid":8800,"taken":10500},"maryline-05":{"member":"maryline","month":5,"savings":1000,"repaid":11550,"taken":16000},"maryline-06":{"member":"maryline","month":6,"savings":1000,"repaid":17600,"taken":19000},"maryline-07":{"member":"maryline","month":7,"savings":1000,"repaid":20900,"taken":18100},"maryline-08":{"member":"maryline","month":8,"savings":1000,"repaid":19910,"taken":19040},"maryline-09":{"member":"maryline","month":9,"savings":1000,"repaid":20940,"taken":22000},"judy-01":{"member":"judy","month":1,"savings":1000,"repaid":0,"taken":0},"judy-02":{"member":"judy","month":2,"savings":1000,"repaid":0,"taken":0},"judy-03":{"member":"judy","month":3,"savings":1000,"repaid":0,"taken":0},"judy-04":{"member":"judy","month":4,"savings":1000,"repaid":0,"taken":0},"judy-05":{"member":"judy","month":5,"savings":1000,"repaid":0,"taken":3000},"judy-06":{"member":"judy","month":6,"savings":1000,"repaid":3300,"taken":7000},"judy-07":{"member":"judy","month":7,"savings":1000,"repaid":7700,"taken":5000},"judy-08":{"member":"judy","month":8,"savings":1000,"repaid":5500,"taken":5000},"judy-09":{"member":"judy","month":9,"savings":1000,"repaid":5500,"taken":5000},"patience-01":{"member":"patience","month":1,"savings":1000,"repaid":0,"taken":0},"patience-02":{"member":"patience","month":2,"savings":1000,"repaid":0,"taken":0},"patience-03":{"member":"patience","month":3,"savings":1000,"repaid":0,"taken":1000},"patience-04":{"member":"patience","month":4,"savings":1000,"repaid":1100,"taken":2500},"patience-05":{"member":"patience","month":5,"savings":1000,"repaid":2750,"taken":2000},"patience-06":{"member":"patience","month":6,"savings":1000,"repaid":2200,"taken":5000},"patience-07":{"member":"patience","month":7,"savings":1000,"repaid":5500,"taken":5000},"patience-08":{"member":"patience","month":8,"savings":1000,"repaid":5500,"taken":6500},"patience-09":{"member":"patience","month":9,"savings":1000,"repaid":7150,"taken":10000},"reuben-01":{"member":"reuben","month":1,"savings":1000,"repaid":0,"taken":0},"reuben-02":{"member":"reuben","month":2,"savings":1000,"repaid":0,"taken":0},"reuben-03":{"member":"reuben","month":3,"savings":1000,"repaid":0,"taken":1350},"reuben-04":{"member":"reuben","month":4,"savings":1000,"repaid":1350,"taken":3500},"reuben-05":{"member":"reuben","month":5,"savings":1000,"repaid":3850,"taken":4000},"reuben-06":{"member":"reuben","month":6,"savings":1000,"repaid":4400,"taken":4850},"reuben-07":{"member":"reuben","month":7,"savings":1000,"repaid":5335,"taken":5000},"reuben-08":{"member":"reuben","month":8,"savings":1000,"repaid":5500,"taken":7000},"reuben-09":{"member":"reuben","month":9,"savings":1000,"repaid":7700,"taken":5000},"ashley-01":{"member":"ashley","month":1,"savings":1000,"repaid":0,"taken":0},"ashley-02":{"member":"ashley","month":2,"savings":1000,"repaid":0,"taken":0},"ashley-03":{"member":"ashley","month":3,"savings":1000,"repaid":0,"taken":1100},"ashley-04":{"member":"ashley","month":4,"savings":1000,"repaid":1100,"taken":2500},"ashley-05":{"member":"ashley","month":5,"savings":1000,"repaid":2750,"taken":3000},"ashley-06":{"member":"ashley","month":6,"savings":1000,"repaid":3300,"taken":4300},"ashley-07":{"member":"ashley","month":7,"savings":1000,"repaid":5170,"taken":5000},"ashley-08":{"member":"ashley","month":8,"savings":1000,"repaid":5500,"taken":5000},"ashley-09":{"member":"ashley","month":9,"savings":1000,"repaid":5500,"taken":5000},"cate-01":{"member":"cate","month":1,"savings":1000,"repaid":0,"taken":0},"cate-02":{"member":"cate","month":2,"savings":1000,"repaid":0,"taken":0},"cate-03":{"member":"cate","month":3,"savings":1000,"repaid":0,"taken":5000},"cate-04":{"member":"cate","month":4,"savings":1000,"repaid":5500,"taken":3000},"cate-05":{"member":"cate","month":5,"savings":1000,"repaid":3300,"taken":5000},"cate-06":{"member":"cate","month":6,"savings":1000,"repaid":5500,"taken":6000},"cate-07":{"member":"cate","month":7,"savings":1000,"repaid":6600,"taken":5000},"cate-08":{"member":"cate","month":8,"savings":1000,"repaid":5500,"taken":5000},"cate-09":{"member":"cate","month":9,"savings":1000,"repaid":5500,"taken":2000},"kennedy-05":{"member":"kennedy","month":5,"savings":5000,"repaid":0,"taken":3000},"kennedy-06":{"member":"kennedy","month":6,"savings":1000,"repaid":3300,"taken":0},"kennedy-07":{"member":"kennedy","month":7,"savings":1000,"repaid":0,"taken":10000},"kennedy-08":{"member":"kennedy","month":8,"savings":1000,"repaid":11000,"taken":10000},"kennedy-09":{"member":"kennedy","month":9,"savings":1000,"repaid":11000,"taken":10000},"j-moraa-07":{"member":"j-moraa","month":7,"savings":7000,"repaid":0,"taken":5000},"j-moraa-08":{"member":"j-moraa","month":8,"savings":1000,"repaid":5500,"taken":7500},"j-moraa-09":{"member":"j-moraa","month":9,"savings":1000,"repaid":8250,"taken":5500},"valarie-05":{"member":"valarie","month":5,"savings":5000,"repaid":0,"taken":0},"valarie-06":{"member":"valarie","month":6,"savings":1000,"repaid":0,"taken":0},"valarie-07":{"member":"valarie","month":7,"savings":1000,"repaid":0,"taken":5000},"valarie-08":{"member":"valarie","month":8,"savings":1000,"repaid":5500,"taken":15000},"valarie-09":{"member":"valarie","month":9,"savings":1000,"repaid":16500,"taken":22000},"mash-01":{"member":"mash","month":1,"savings":1000,"repaid":0,"taken":0},"mash-02":{"member":"mash","month":2,"savings":1000,"repaid":0,"taken":0},"mash-03":{"member":"mash","month":3,"savings":1000,"repaid":0,"taken":0},"mash-04":{"member":"mash","month":4,"savings":1000,"repaid":0,"taken":5000},"mash-05":{"member":"mash","month":5,"savings":1000,"repaid":5500,"taken":13520},"mash-06":{"member":"mash","month":6,"savings":1000,"repaid":14850,"taken":14000},"mash-07":{"member":"mash","month":7,"savings":1000,"repaid":14400,"taken":12400},"mash-08":{"member":"mash","month":8,"savings":1000,"repaid":13640,"taken":15000},"mash-09":{"member":"mash","month":9,"savings":1000,"repaid":16500,"taken":17000},"julius-01":{"member":"julius","month":1,"savings":1000,"repaid":0,"taken":0},"julius-02":{"member":"julius","month":2,"savings":1000,"repaid":0,"taken":0},"julius-03":{"member":"julius","month":3,"savings":1000,"repaid":0,"taken":0},"julius-04":{"member":"julius","month":4,"savings":1000,"repaid":0,"taken":0},"julius-05":{"member":"julius","month":5,"savings":1000,"repaid":0,"taken":0},"julius-06":{"member":"julius","month":6,"savings":1000,"repaid":0,"taken":0},"julius-07":{"member":"julius","month":7,"savings":1000,"repaid":0,"taken":7000},"julius-08":{"member":"julius","month":8,"savings":1000,"repaid":7700,"taken":10000},"julius-09":{"member":"julius","month":9,"savings":1000,"repaid":11000,"taken":20000},"out-borrow-maryline-03":{"member":"out-borrow-maryline","month":3,"savings":0,"repaid":0,"taken":2000},"out-borrow-maryline-04":{"member":"out-borrow-maryline","month":4,"savings":0,"repaid":3600,"taken":0},"out-borrow-maryline-05":{"member":"out-borrow-maryline","month":5,"savings":0,"repaid":0,"taken":2000},"out-borrow-maryline-06":{"member":"out-borrow-maryline","month":6,"savings":0,"repaid":2200,"taken":0},"out-borrow-phanice-03":{"member":"out-borrow-phanice","month":3,"savings":0,"repaid":0,"taken":3000},"out-borrow-phanice-04":{"member":"out-borrow-phanice","month":4,"savings":0,"repaid":2400,"taken":0},"out-borrow-phanice-05":{"member":"out-borrow-phanice","month":5,"savings":0,"repaid":0,"taken":6000},"out-borrow-phanice-06":{"member":"out-borrow-phanice","month":6,"savings":0,"repaid":7200,"taken":0},"betty-01":{"member":"betty","month":1,"savings":1000,"repaid":0,"taken":0},"betty-02":{"member":"betty","month":2,"savings":1000,"repaid":0,"taken":0},"betty-03":{"member":"betty","month":3,"savings":1000,"repaid":0,"taken":0},"betty-04":{"member":"betty","month":4,"savings":1000,"repaid":0,"taken":1000},"betty-05":{"member":"betty","month":5,"savings":1000,"repaid":1100,"taken":0},"betty-06":{"member":"betty","month":6,"savings":1000,"repaid":0,"taken":2000},"betty-07":{"member":"betty","month":7,"savings":1000,"repaid":2200,"taken":2000},"betty-08":{"member":"betty","month":8,"savings":1000,"repaid":2200,"taken":2000},"betty-09":{"member":"betty","month":9,"savings":1000,"repaid":2200,"taken":3700}},"settings":{"year":2026,"contribution":1000,"monthsCompleted":9,"cashBf":0}};
+function setRole(){
+  $('#rolepill').textContent=S.canWrite?'Treasurer · can edit':'Member · view only';
+  $('#rolepill').className='pill '+(S.canWrite?'edit':'view');
+}
+function subscribe(db){
+  const done=()=>{if(S.loaded.m&&S.loaded.e&&S.loaded.s&&S.loaded.c)sync('');renderAll();$('#import-box').hidden=!(S.canWrite&&S.loaded.m&&Object.keys(S.members).length===0);};
+  db.collection('members').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>{m[d.id]={id:d.id,...d.data()};});S.members=m;S.loaded.m=true;done();},e=>sync('Members: '+e.code));
+  db.collection('entries').onSnapshot(snap=>{const en={};snap.docs.forEach(d=>{en[d.id]=d.data();});if(!document.activeElement||!document.activeElement.dataset||!document.activeElement.dataset.key)S.entries=en;else{for(const k of Object.keys(en))if(!pending['e:'+k])S.entries[k]=en[k];}S.loaded.e=true;done();},e=>sync('Entries: '+e.code));
+  db.doc('settings/main').onSnapshot(snap=>{if(snap.exists)S.settings=Object.assign({year:2026,contribution:1000,monthsCompleted:0,cashBf:0},snap.data());S.loaded.s=true;done();},e=>sync('Settings: '+e.code));
+  db.doc('cashcount/latest').onSnapshot(snap=>{if(snap.exists&&!pending['cash'])S.cash=snap.data();S.loaded.c=true;done();},e=>{});
+}
+if(!window.firebase||!CONFIG.firebase.apiKey){
+  $('#gate').hidden=false;$('#g-member').disabled=true;$('#g-treasurer').disabled=true;
+  $('#g-msg').textContent='Not configured yet: open index.html and paste your Firebase config into the CONFIG block at the top (see README).';
+}else{
+  firebase.initializeApp(CONFIG.firebase);
+  const fdb=firebase.firestore(), auth=firebase.auth();
+  const editors=CONFIG.editors.map(e=>e.toLowerCase());
+  $('#g-member').addEventListener('click',()=>{$('#g-msg').textContent='';auth.signInAnonymously().catch(e=>{$('#g-msg').textContent='Could not sign in: '+e.code+'. In Firebase Authentication, enable the Anonymous provider.';});});
+  $('#g-treasurer').addEventListener('click',()=>{$('#g-msg').textContent='';auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{$('#g-msg').textContent='Could not sign in: '+e.code;});});
+  let subscribed=false;
+  auth.onAuthStateChanged(u=>{
+    const signedIn=!!u; $('#gate').hidden=signedIn; document.querySelector('main').hidden=!signedIn; document.querySelector('header.top').hidden=!signedIn;
+    if(!u){S.db=null;$('#authbox').innerHTML='';return;}
+    const email=(u.email||'').toLowerCase();
+    S.canWrite=!!email&&editors.includes(email);
+    if(email&&!S.canWrite){$('#g-msg').textContent='';}
+    setRole();
+    $('#authbox').innerHTML=`<button id="signout">${email?esc(email)+' · ':''}Sign out</button>`;
+    $('#signout').addEventListener('click',()=>auth.signOut().then(()=>location.reload()));
+    S.db=fdb; sync('Connecting…');
+    if(!subscribed){subscribed=true;subscribe(fdb);} else renderAll();
+  });
+  $('#import-btn').addEventListener('click',async()=>{
+    if(!S.canWrite)return; const b=$('#import-btn'); b.disabled=true; b.textContent='Importing…';
+    try{const batch=fdb.batch();
+      batch.set(fdb.doc('settings/main'),SEED.settings);
+      for(const [k,v] of Object.entries(SEED.members))batch.set(fdb.doc('members/'+k),v);
+      for(const [k,v] of Object.entries(SEED.entries))batch.set(fdb.doc('entries/'+k),v);
+      await batch.commit(); toast('Records imported');
+    }catch(e){toast('Import failed: '+e.code);b.disabled=false;b.textContent='Import Jan–Sep 2026 records';}
+  });
+}
+})();
+</script>
+</body>
+</html>
